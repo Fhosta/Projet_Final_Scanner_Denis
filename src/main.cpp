@@ -6,7 +6,8 @@ constexpr uint8_t RST_PIN = 16;        // Define pin D0 for the RST pin
 constexpr uint8_t SDA_PIN = 15;        // Define pin D8 for the SDA pin
 
 byte readCard[4];
-String MasterTag = "A50FB433";  // Tag ID of your RFID card (TO BE SUBSTITUTED)
+String MasterTag = "A5FB433";
+String TagThomas = "75FD633";  // Tag ID of your RFID card (TO BE SUBSTITUTED)
 String tagID = "";
 
 MFRC522 mfrc522(SDA_PIN, RST_PIN);  // Create MFRC522 instance
@@ -25,13 +26,19 @@ void loop()
   //Wait until new tag is available
   while (getUID()) 
   {
+    // Serial.print(tagID);
     if (tagID == MasterTag) 
     { 
-      Serial.println(" Authorized");
+      Serial.println("Le grand maître");
     }
+    else if(tagID == TagThomas)
+    {
+       Serial.println("Bienvenue Thomas");
+    }
+
     else
     {
-      Serial.println(" Unauthorized!");
+      Serial.println("Tu n'a pas les autorisations nécessaire !!!!!!!!!");
     } 
     delay(2000);
   }
