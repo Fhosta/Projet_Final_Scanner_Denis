@@ -26,7 +26,7 @@ void loop()
   //Wait until new tag is available
   while (getUID()) 
   {
-    // Serial.print(tagID);
+     Serial.print(tagID);
     if (tagID == MasterTag) 
     { 
       Serial.println("Le grand maître");
