@@ -5,6 +5,10 @@
 constexpr uint8_t RST_PIN = 16;        // Define pin D0 for the RST pin
 constexpr uint8_t SDA_PIN = 15;        // Define pin D8 for the SDA pin
 
+// Broches des LED
+const int ledPin1 = 5; // Define pin D1 
+const int ledPin2 = 4; // Define pin D2
+
 byte readCard[4];
 String MasterTag = "A5FB433";
 String TagThomas = "75FD633";  // Tag ID of your RFID card (TO BE SUBSTITUTED)
@@ -17,6 +21,11 @@ void setup() {
 	while (!Serial);	// Do nothing if no serial port is opened
 	SPI.begin();		// Initialize SPI bus
 	mfrc522.PCD_Init();	// Initialize MFRC522
+
+  // Initialisation des broches de sortie pour les LED
+  pinMode(ledPin1, OUTPUT);
+  pinMode(ledPin2, OUTPUT);
+
 }
 
 boolean getUID();
@@ -30,15 +39,27 @@ void loop()
     if (tagID == MasterTag) 
     { 
       Serial.println("Le grand maître");
+      digitalWrite(ledPin1, HIGH);
+      delay(1000);
+      digitalWrite(ledPin1, LOW);
+      delay(1000);
     }
     else if(tagID == TagThomas)
     {
-       Serial.println("Bienvenue Thomas");
+      Serial.println("Bienvenue Thomas");
+      digitalWrite(ledPin1, HIGH);
+      delay(1000);
+      digitalWrite(ledPin1, LOW);
+      delay(1000);
     }
 
     else
     {
       Serial.println("Tu n'a pas les autorisations nécessaire !!!!!!!!!");
+      digitalWrite(ledPin2, HIGH);
+      delay(1000);
+      digitalWrite(ledPin2, LOW);
+      delay(1000);
     } 
     delay(2000);
   }
