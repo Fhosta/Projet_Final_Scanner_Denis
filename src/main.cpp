@@ -1,3 +1,13 @@
+///////////////////////////////////////////////Présentation /////////////////////////////////////
+
+//Auteur : Florian Hostachy
+//Date : 5/4/2023
+//Fonction: identifie une personne est envoi sont nom et numéro de badge a notre api allume une lumière rouge si l'utilisateur est non connu sinon verte pour les autorisées
+
+///////////////////////////////////////////////Présentation /////////////////////////////////////
+
+
+// Fichier nécessaire
 #include <Arduino.h>
 #include <SPI.h>
 #include <MFRC522.h>
@@ -9,14 +19,13 @@ WiFiClient client;
 const char* ssid = "EcoleDuWeb2.4g";
 const char* password = "EcoleDuWEB";
 
+// Information pour l'api
 const char* apiHost = "api.qc-ca.ovh";
 const int apiPort = 2222;
 const char* apiEndpoint = "/api/ajouter/jeton";
 
-
-
-constexpr uint8_t RST_PIN = 16;        // Define pin D0 for the RST pin
-constexpr uint8_t SDA_PIN = 15;        // Define pin D8 for the SDA pin
+constexpr uint8_t RST_PIN = 16;   // Define pin D0 for the RST pin
+constexpr uint8_t SDA_PIN = 15;   // Define pin D8 for the SDA pin
 
 // Broches des LED
 const int ledPin1 = 5; // Define pin D1 
@@ -26,19 +35,20 @@ byte readCard[4];
 String MasterTag = "A5FB433";
 String TagThomas = "75FD633";  // Tag ID of your RFID card (TO BE SUBSTITUTED)
 String numtag = "";
+String nom = "";
 String requestBody = "{\"numtag\":\"";
 
 MFRC522 mfrc522(SDA_PIN, RST_PIN);  // Create MFRC522 instance
 
 boolean getUID();
 
-
-void connectAndSendRequest(const char* apiHost, uint16_t apiPort, const char* apiEndpoint, const String& requestBody, const String& numtag) {
+void connectAndSendRequest(const char* apiHost, uint16_t apiPort, const char* apiEndpoint, const String& requestBody, const String& numtag,const String& nom) {
   if (client.connect(apiHost, apiPort)) {
     Serial.println("Connected to API");
     
     // Construction du corps de la requête JSON en incluant la valeur de numtag
-    String fullRequestBody = "{\"numtag\": \"" + numtag + "\"}";
+    String fullRequestBody = "{\"numtag\": \"" + numtag + "\", \"nom\": \"" + nom + "\"}";
+
 
     // Envoi de la requête POST
     client.print(String("POST ") + apiEndpoint + " HTTP/1.1\r\n" +
@@ -49,16 +59,7 @@ void connectAndSendRequest(const char* apiHost, uint16_t apiPort, const char* ap
                  "\r\n" +
                  fullRequestBody);
 
-     // Envoi de la requête POST
-    Serial.println(String("POST ") + apiEndpoint + " HTTP/1.1\r\n" +
-                 "Host: " + apiHost + "\r\n" +
-                 "Connection: close\r\n" +
-                 "Content-Type: application/json\r\n" +
-                 "Content-Length: " + String(fullRequestBody.length()) + "\r\n" +
-                 "\r\n" +
-                 fullRequestBody);
-             
-
+  
     // Lecture de la réponse de l'API
     while (client.connected() || client.available()) {
       if (client.available()) {
@@ -73,7 +74,6 @@ void connectAndSendRequest(const char* apiHost, uint16_t apiPort, const char* ap
     Serial.println("API disconnected");
   }
 }
-
 
 void setup() {
   Serial.begin(9600);  // Initialize serial communications with the PC
@@ -106,25 +106,25 @@ void loop()
      Serial.print(numtag);
     if (numtag == MasterTag) 
     { 
-      Serial.println("Bienvenue Henri");
+      nom = "Henri";
       digitalWrite(ledPin1, HIGH);
       delay(1000);
       digitalWrite(ledPin1, LOW);
       delay(1000);
-      connectAndSendRequest(apiHost, apiPort, apiEndpoint, requestBody,numtag);
+      connectAndSendRequest(apiHost, apiPort, apiEndpoint, requestBody,numtag,nom);
     }
     else if(numtag == TagThomas)
     {
-      Serial.println("Bienvenue Thomas");
+      nom = "Tony";
       digitalWrite(ledPin1, HIGH);
       delay(1000);
       digitalWrite(ledPin1, LOW);
       delay(1000);
+      connectAndSendRequest(apiHost, apiPort, apiEndpoint, requestBody,numtag,nom);
     }
 
     else
     {
-      Serial.println("Tu n'a pas les autorisations nécessaire !!!!!!!!!");
       digitalWrite(ledPin2, HIGH);
       delay(1000);
       digitalWrite(ledPin2, LOW);
@@ -134,11 +134,6 @@ void loop()
   }
 }
 
-
-
-  /// @brief 
-  //Fonction pour la lecture des tags 
-  /// @return 
 
   boolean getUID() {
   // Getting ready for reading Tags
